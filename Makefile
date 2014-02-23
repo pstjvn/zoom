@@ -87,8 +87,6 @@ define SOURCES
 --root=js/ \
 --root=$(TEMPLATE_TMP_DIR)/$(LOCALE)/ \
 --root=$(PSTJ) \
---root=$(SMJS) \
---root=$(GCW) \
 --root=$(TEMPLATES_PATH) \
 --root=$(LIBRARY_PATH)
 endef
@@ -96,9 +94,7 @@ endef
 define JSFILES
 -f --js=build/deps.js \
 -f --js=$(TEMPLATES_PATH)/deps.js \
--f --js=$(PSTJ)/deps.js \
--f --js=$(SMJS)/deps.js \
--f --js=$(GCW)/deps.js
+-f --js=$(PSTJ)/deps.js
 endef
 
 

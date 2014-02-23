@@ -1,20 +1,10 @@
 <!doctype html>
 <html>
   <head>
-    <title>Floor plan</title>
+    <title>Floor plan presentation</title>
     <meta content="width=device-width, maximum-scale=1.0, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="build/app.css">
-    <!--REMOVE IN PRODUCTION-->
-    <!--<link rel="stylesheet/less" type="text/css" href="less/mobiletv.less">-->
-    <!--<script>-->
-    <!--  less = {-->
-    <!--    env: "development",-->
-    <!--    poll: 1000-->
-    <!--  };-->
-    <!--</script>-->
-    <!--<script src="libs/less.js" type="text/javascript"></script>-->
-    <!--end REMOVE IN PRODUCTION -->
-    <script src="assets/data.js"></script>
+    <script src="assets/data1.js"></script>
     <script>
       PSTJ = {
         NGAGENT: {
@@ -22,12 +12,19 @@
         }
       };
       AREOUS = {
+        TEXT: {
+          START_ANIMATION: 'Start animation',
+          STOP_ANIMATION: 'Stop animation'
+        },
+        PRESENTATION_STEP_DURATION: 3, // in seconds
         FIXED_SIZE: {
-          WIDTH: 688
+          WIDTH: 688 // in pixels
         }
       }
     </script>
-    <!-- Keep this style for the loader -->
+    <!-- Keep this style for the loader. Can be edited anyway but the main
+    class name should bee preserved for the compiled code to be
+    able to remove it from the page. -->
     <style>
       .loader {
         top: 0;
@@ -47,13 +44,16 @@
     <div class="loader">
       Loading...
     </div>
-    <div id="animationbutton">Start animation</div>
+    <!-- remove those in production mode -->
+
     <script src="build/app-cssmap.js"></script>
     <script src="../../library/closure/goog/base.js"></script>
     <script src="../pstj/deps.js"></script>
-    <script src="../smjs/deps.js"></script>
+    <script src="../../templates/deps.js"></script>
     <script src="build/deps.js"></script>
     <script>goog.require('app');</script>
+
+    <!-- enable this in production mode -->
 
     <!--<script src="build/app.build.js"></script>-->
 

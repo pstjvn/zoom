@@ -22,10 +22,10 @@ goog.inherits(zoom.model.FloorModel, pstj.ds.ListItem);
  * @enum {string}
  */
 zoom.model.FloorModel.DEFS = {
-  WIDTH: 'w',
-  HEIGHT: 'h',
-  SRC: 'imgsrc',
-  SCALE: 'scale'
+  WIDTH: 'width',
+  HEIGHT: 'height',
+  SRC: 'floor_plan_name',
+  SCALE: 'zoom_factor'
 };
 
 
@@ -39,11 +39,9 @@ var defs = zoom.model.FloorModel.DEFS;
  * @private
  */
 _.preprocess_ = function() {
-  console.log('Preprocess', this.getProp(defs.WIDTH));
   this.size = new goog.math.Size(
       goog.asserts.assertNumber(this.getProp(defs.WIDTH)),
       goog.asserts.assertNumber(this.getProp(defs.HEIGHT)));
-  console.log(this.size.width)
 };
 
 

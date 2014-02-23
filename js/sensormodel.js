@@ -19,13 +19,15 @@ goog.inherits(zoom.model.SensorModel, pstj.ds.ListItem);
  * @enum {string}
  */
 zoom.model.SensorModel.DEFS = {
-  COLOR: 'c',
-  WIDTH: 'x',
-  HEIGHT: 'y',
+  COLOR: 'font_color',
+  WIDTH: 'left',
+  HEIGHT: 'top',
   PERCENT_TOP: 'py',
   PERCENT_LEFT: 'px',
-  SIZE: 's',
-  BACKGROUND_COLOR: 'bg'
+  SIZE: 'size',
+  NAME: 'name',
+  UNIT: 'unit',
+  BACKGROUND_COLOR: 'dot_color'
 };
 
 
