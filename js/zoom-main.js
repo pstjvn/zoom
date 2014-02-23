@@ -330,13 +330,25 @@ _.updateStyles = function(duration, timing) {
 _.fitInitial = function() {
   // notify completer that we need special tratment so it can call start again.
   this.animationStage = -1;
-  var scale = (this.sheet.size.width / this.fitScreenSize.width) / 100;
-  this.sheet.setSize(this.fitScreenSize.clone());
-  this.sensorlayer.setSize(this.fitScreenSize.clone());
-  this.applyTransformation(
-    ((this.frame.size.width / 2) - (this.fitScreenSize.width / 2)) * 1,
-    ((this.frame.size.height / 2) - (this.fitScreenSize.height / 2)) * 1,
-    scale);
+  this.updateStyles(0.5, 'linear');
+  this.setAnimationClass(true);
+  var scale = pstj.math.utils.getPercentFromValue(
+      this.fitScreenSize.width, this.sheet.size.width) / 100;
+  var x = (this.sheet.size.width - (this.sheet.size.width * scale));
+  x = (x / -2) + (this.frame.size.width / 2) ;
+  x = x - (this.sheet.size.width * scale / 2);
+  var y = (this.sheet.size.height - (this.sheet.size.height * scale));
+  y = (y / -2) + (this.frame.size.height / 2);
+  y = y - (this.sheet.size.height * scale / 2);
+  this.sheet.size.width = this.fitScreenSize.width;
+  this.sheet.size.height = this.fitScreenSize.height;
+  this.sensorlayer.size.width = this.fitScreenSize.width;
+  this.sensorlayer.size.height = this.fitScreenSize.height;
+  var xoff = ((this.frame.size.width/2) - (this.fitScreenSize.width / 2)) * -1;
+  var yoff = ((this.frame.size.height/2) - (this.fitScreenSize.height / 2)) * -1;
+  this.sheet.setOffsets(xoff, yoff);
+  this.sensorlayer.setOffsets(xoff, yoff);
+  this.applyTransformation(x, y, scale);
 };
 
 
@@ -346,7 +358,7 @@ _.fitInitial = function() {
  */
 _.startAnimation = function() {
   this.animationButton.setValue(zoom.text.stopAnimation);
-  goog.style.setElementShown(this.eventBlocker_, true);
+  //goog.style.setElementShown(this.eventBlocker_, true);
   if (!goog.math.Size.equals(this.sheet.size, this.fitScreenSize)) {
     // fit to initial size first.
     this.fitInitial();
@@ -417,6 +429,7 @@ _.startNextAnimationIteration = function() {
  * @protected
  */
 _.continueAnimation = function() {
+  console.log('anomation ended')
   if (this.isAnimationRunning) {
     if (this.animationStage == -1) {
       this.animationStage = 0;
@@ -425,7 +438,9 @@ _.continueAnimation = function() {
       this.sensorlayer.applySize();
       this.sheet.update();
       this.sensorlayer.update();
-      this.startAnimation();
+      setTimeout(function() {
+        this.startAnimation();
+      }.bind(this), 500);
     } else if (this.animationStage == 0) {
       this.animationStage = 1;
       this.setAnimationClass(false);
@@ -433,7 +448,7 @@ _.continueAnimation = function() {
       this.sensorlayer.applySize();
       this.sheet.update();
       this.sensorlayer.update();
-      this.startNextAnimationIteration();
+      setTimeout(this.startNextAnimationIteration.bind(this), 500);
     } else if (this.animationStage == 1) {
       this.animationStage = 2;
       this.finishSlideAnimation();
@@ -442,27 +457,25 @@ _.continueAnimation = function() {
       this.startNextAnimationIteration();
     }
   } else {
-    if (this.animationStage == 0) {
-      // we just finished the initial step, revert to original state.
-      this.animationStage = 1;
-    } else if (this.animationStage == 1) {
-      // we are halfway to the next point, continue
-      this.animationStage = 2;
-      this.finishSlideAnimation();
-    } else if (this.animationStage == 2) {
-      // we are at the end of the two step animation, revert to original.
-      this.animationStage = 3;
-      // animate to original scale (on start)
-
-    } else if (this.animationStage == 3) {
-      // we are out of animation cycle, remove animation class.
-      this.setAnimationClass(false);
+    if (this.animationStage == -1)  {
+      //finihed going back to initial fit.
       this.animationStage = 0;
+      this.setAnimationClass(false);
       goog.style.setElementShown(this.eventBlocker_, false);
       this.sheet.applySize();
       this.sensorlayer.applySize();
       this.sheet.update();
       this.sensorlayer.update();
+      return;
+    } else if (this.animationStage == 0) {
+      // we just finished the initial step, revert to original state
+      this.fitInitial();
+    } else if (this.animationStage == 1) {
+      // we are halfway to the next point, continue
+      this.animationStage = 2;
+      this.finishSlideAnimation();
+    } else if (this.animationStage == 2) {
+      this.fitInitial();
     }
   }
 };
@@ -564,6 +577,7 @@ _.startSlideAnimation = function() {
  * @param {number} scale the scale.
  */
 _.applyTransformation = function(x, y, scale) {
+  console.log('aaaaaa', x, y, scale)
   pstj.lab.style.css.setTranslation(this.sheet.getElement(),
       x, y, undefined, 'scale(' + scale + ')');
   pstj.lab.style.css.setTranslation(this.sensorlayer.getElement(),
