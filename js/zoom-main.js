@@ -111,6 +111,13 @@ zoom.control.Main = function() {
    */
   this.eventBlocker_ = null;
 
+  /**
+   * Reference to the initial fitted size of the sheets.
+   * @type {goog.math.Size}
+   * @protected
+   */
+  this.fitScreenSize = null;
+
   this.hideTooltipDelay_ = new goog.async.Delay(function() {
     this.info.setActive(false);
   }, 2000, this);
@@ -167,13 +174,25 @@ _.init_ = function() {
       this.floormodel.getImageSource() + ')';
 
   this.sensorlayer.setModel(this.points);
-  var size = goog.asserts.assertInstanceof(
+  // Determine and remomeber the initial fitted screen size.
+  this.fitScreenSize = goog.asserts.assertInstanceof(
       this.floormodel.size, goog.math.Size).clone().scaleToFit(
       goog.asserts.assertInstanceof(this.frame.size, goog.math.Size));
-  this.sheet.setSize(size);
-  this.sensorlayer.setSize(size.clone());
+
+  // Set the sheets to the initial size.
+  this.sheet.setSize(this.fitScreenSize.clone());
+  this.sensorlayer.setSize(this.fitScreenSize.clone());
   this.frame.addChild(this.sheet);
   this.frame.addChild(this.sensorlayer);
+
+
+  var xoffset = ((this.frame.size.width / 2) - (this.sheet.size.width / 2)) * -1;
+  var yoffset = ((this.frame.size.height / 2) - (this.sheet.size.height / 2)) * -1;
+
+  this.sheet.setOffsets(xoffset, yoffset);
+  this.sensorlayer.setOffsets(xoffset, yoffset);
+  this.sheet.update();
+  this.sensorlayer.update();
 
   goog.events.listen(this.sheet.getElement(),
       goog.events.EventType.TRANSITIONEND, this.continueAnimation.bind(this));
@@ -308,6 +327,19 @@ _.updateStyles = function(duration, timing) {
 };
 
 
+_.fitInitial = function() {
+  // notify completer that we need special tratment so it can call start again.
+  this.animationStage = -1;
+  var scale = (this.sheet.size.width / this.fitScreenSize.width) / 100;
+  this.sheet.setSize(this.fitScreenSize.clone());
+  this.sensorlayer.setSize(this.fitScreenSize.clone());
+  this.applyTransformation(
+    ((this.frame.size.width / 2) - (this.fitScreenSize.width / 2)) * 1,
+    ((this.frame.size.height / 2) - (this.fitScreenSize.height / 2)) * 1,
+    scale);
+};
+
+
 /**
  * Start the anomation
  * @protected
@@ -315,6 +347,11 @@ _.updateStyles = function(duration, timing) {
 _.startAnimation = function() {
   this.animationButton.setValue(zoom.text.stopAnimation);
   goog.style.setElementShown(this.eventBlocker_, true);
+  if (!goog.math.Size.equals(this.sheet.size, this.fitScreenSize)) {
+    // fit to initial size first.
+    this.fitInitial();
+    return;
+  }
 
   var point = this.points.getCurrent();
   // current scale ratio.
@@ -381,7 +418,15 @@ _.startNextAnimationIteration = function() {
  */
 _.continueAnimation = function() {
   if (this.isAnimationRunning) {
-    if (this.animationStage == 0) {
+    if (this.animationStage == -1) {
+      this.animationStage = 0;
+      this.setAnimationClass(false);
+      this.sheet.applySize();
+      this.sensorlayer.applySize();
+      this.sheet.update();
+      this.sensorlayer.update();
+      this.startAnimation();
+    } else if (this.animationStage == 0) {
       this.animationStage = 1;
       this.setAnimationClass(false);
       this.sheet.applySize();
