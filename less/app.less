@@ -54,6 +54,30 @@ html, body, .container {
   cursor: pointer;
 }
 
+.info-container {
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 160px;
+  .translation(0, -200px);
+  .transitiontranslate(500ms);
+}
+
+.info-container.active {
+  opacity: 1;
+}
+
+.sensor-info {
+  display: inline-block;
+  width: 250px;
+  height: 150px;
+  background-color: black;
+  z-index: 20;
+  border: 4px solid blue;
+}
+
 .goog-control-hover {
   z-index: 2;
 }
@@ -79,3 +103,4 @@ html, body, .container {
 .pstj-button-hover {
   background: #4E8642;
 }
+

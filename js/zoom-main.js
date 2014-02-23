@@ -1,5 +1,6 @@
 goog.provide('zoom.control.Main');
 
+goog.require('goog.async.Delay');
 goog.require('goog.dom.classlist');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
@@ -13,6 +14,7 @@ goog.require('pstj.ui.Button');
 goog.require('pstj.ui.SheetFrame');
 goog.require('pstj.ui.Touchable.EventType');
 goog.require('zoom.component.FloorPlan');
+goog.require('zoom.component.Info');
 goog.require('zoom.component.SensorLayer');
 goog.require('zoom.model.FloorModel');
 goog.require('zoom.model.SensorModel');
@@ -40,6 +42,12 @@ zoom.control.Main = function() {
    * @protected
    */
   this.animationStage = 0;
+  /**
+   * The info component.
+   * @type {zoom.component.Info}
+   * @protected
+   */
+  this.info = new zoom.component.Info();
   /**
    * The main frame of the app - hosts the scaling view. Required for handling
    * resizes.
@@ -103,6 +111,10 @@ zoom.control.Main = function() {
    */
   this.eventBlocker_ = null;
 
+  this.hideTooltipDelay_ = new goog.async.Delay(function() {
+    this.info.setActive(false);
+  }, 2000, this);
+
   this.init_();
 };
 goog.addSingletonGetter(zoom.control.Main);
@@ -143,6 +155,8 @@ _.init_ = function() {
       goog.getCssName('trigger-button')));
   this.eventBlocker_ = document.querySelector('.' +
       goog.getCssName('event-blocker'));
+
+  this.info.render(document.body);
 
   goog.style.setElementShown(this.eventBlocker_, false);
   this.animationButton.setValue(zoom.text.startAnimation);
@@ -226,9 +240,9 @@ _.processData = function() {
   var points = data['placedSensors'];
   var floor = data['floorPlanInfo'];
   //var values = data['values'];
-  floor['width'] = parseInt(floor['width']);
-  floor['height'] = parseInt(floor['height']);
-  floor['zoom_factor'] = parseInt(floor['zoom_factor']);
+  floor['width'] = parseInt(floor['width'], 10);
+  floor['height'] = parseInt(floor['height'], 10);
+  floor['zoom_factor'] = parseInt(floor['zoom_factor'], 10);
 
   var originalwidth = pstj.configure.getRuntimeValue('WIDTH',
       goog.asserts.assertNumber(floor['width']), 'AREOUS.FIXED_SIZE');
@@ -236,9 +250,9 @@ _.processData = function() {
   var scaleFactor = floor['width'] / originalwidth;
   goog.array.forEach(points, function(item) {
 
-    item['id'] = parseInt(item['id']);
-    item['left'] = parseInt(item['left']) * scaleFactor;
-    item['top'] = parseInt(item['top']) * scaleFactor;
+    item['id'] = parseInt(item['id'], 10);
+    item['left'] = parseInt(item['left'], 10) * scaleFactor;
+    item['top'] = parseInt(item['top'], 10) * scaleFactor;
     item['size'] = this.getSensorSize(item['size']);
     item['font_color'] = '#' + item['font_color'];
     item['dot_color'] = '#' + item['dot_color'];
@@ -354,7 +368,7 @@ _.startNextAnimationIteration = function() {
   // After the tip is shown we can update the list to the next point.
   this.points.setCurrent(this.points.getNext());
   // wait for the tooltip
-  setTimeout(this.startSlideAnimation.bind(this), 1000);
+  setTimeout(this.startSlideAnimation.bind(this), 2500);
 };
 
 
@@ -517,7 +531,11 @@ _.applyTransformation = function(x, y, scale) {
  * @protected
  */
 _.showToolTip = function() {
-  console.log('Whatever');
+  this.info.setModel(this.points.getCurrent());
+  var y_offset = (this.frame.size.height / 2) - this.info.size.height - 30;
+  this.info.setActive(true, y_offset);
+  this.hideTooltipDelay_.start();
+
 };
 
 
