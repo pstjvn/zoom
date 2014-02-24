@@ -1,6 +1,5 @@
 @import "../../pstj/less/transitions";
 @import "../../pstj/less/translation";
-@import "animations";
 
 @font-face {
     font-family: Helvetica;
@@ -53,6 +52,7 @@ html, body, .container {
   top: 0;
   left: 0;
   cursor: pointer;
+  box-shadow: 0 0 3px black;
 }
 
 .info-container {
@@ -74,20 +74,28 @@ html, body, .container {
   display: inline-block;
   width: 270px;
   height: 119px;
-  background-color: black;
+  background-color: #8eb9ff;
   border: 4px solid blue;
+  box-shadow: 0 0 5px black;
 }
 
 .sensor-info:after {
   content: "";
-  width: 0;
-  height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-top: 20px solid #8eb9ff;
+  width: 20px;
+  height: 20px;
+  // border-left: 20px solid transparent;
+  // border-right: 20px solid transparent;
+  // border-top: 20px solid #8eb9ff;
   position: absolute;
   left: 50%;
-  margin-left: -20px;
+  bottom: -14px;
+  margin-left: -9px;
+  background-color: #8eb9ff;
+  box-shadow: 2px 2px 2px rgba(0,0,0,0.4);
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .goog-control-hover {
@@ -96,6 +104,7 @@ html, body, .container {
 
 .val {
   position: absolute;
+  text-shadow: white 1px 0 0, white -1px 0 0, white 0 1px 0, white 0 -1px 0;
 }
 
 .pstj-button {
