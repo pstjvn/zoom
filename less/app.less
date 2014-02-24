@@ -1,5 +1,6 @@
 @import "../../pstj/less/transitions";
 @import "../../pstj/less/translation";
+@import "animations";
 
 @font-face {
     font-family: Helvetica;
@@ -60,9 +61,9 @@ html, body, .container {
   top: 0;
   left: 0;
   width: 100%;
-  height: 160px;
+  height: 119px;
   .translation(0, -200px);
-  .transitiontranslate(500ms);
+  .transitiontranslate(500ms cubic-bezier(0.715, -0.255, 0.610, 1.325));
 }
 
 .info-container.active {
@@ -71,10 +72,22 @@ html, body, .container {
 
 .sensor-info {
   display: inline-block;
-  width: 250px;
-  height: 150px;
+  width: 270px;
+  height: 119px;
   background-color: black;
   border: 4px solid blue;
+}
+
+.sensor-info:after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 20px solid #8eb9ff;
+  position: absolute;
+  left: 50%;
+  margin-left: -20px;
 }
 
 .goog-control-hover {
@@ -104,3 +117,14 @@ html, body, .container {
   background: #4E8642;
 }
 
+.sensor-name {
+  font-size: 140%;
+  color: #707070;
+  padding: 10px 0;
+  text-transform: uppercase;
+}
+
+.sensor-unit {
+  color: white;
+  font-size: 400%;
+}
