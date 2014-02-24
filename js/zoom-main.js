@@ -5,6 +5,7 @@ goog.require('goog.dom.classlist');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.events.MouseWheelHandler');
+goog.require('goog.labs.net.xhr');
 goog.require('goog.math.Size');
 goog.require('goog.style');
 goog.require('pstj.ds.List');
@@ -117,6 +118,20 @@ zoom.control.Main = function() {
    * @protected
    */
   this.fitScreenSize = null;
+
+  /**
+   * Pre=bound handler for the data on update.
+   * @type {function(?): void}
+   * @private
+   */
+  this.bound_ = this.onValuesUpdate.bind(this);
+
+
+  this.updateDelay_ = new goog.async.Delay(function() {
+    goog.labs.net.xhr.getJson(goog.asserts.assertString(
+        pstj.configure.getRuntimeValue('VALUES_URL',
+        '/', 'AREOUS'))).then(this.bound_);
+  }, 1000, this);
 
   this.hideTooltipDelay_ = new goog.async.Delay(function() {
     this.info.setActive(false);
@@ -232,6 +247,10 @@ _.init_ = function() {
   }, 1000);
 };
 
+_.onValuesUpdate = function() {
+
+};
+
 
 /**
  * Precalculate sensor sizes.
@@ -327,6 +346,10 @@ _.updateStyles = function(duration, timing) {
 };
 
 
+/**
+ * Fit the current view to the initial state (fit to window).
+ * @protected
+ */
 _.fitInitial = function() {
   // notify completer that we need special tratment so it can call start again.
   this.animationStage = -1;
@@ -335,7 +358,7 @@ _.fitInitial = function() {
   var scale = pstj.math.utils.getPercentFromValue(
       this.fitScreenSize.width, this.sheet.size.width) / 100;
   var x = (this.sheet.size.width - (this.sheet.size.width * scale));
-  x = (x / -2) + (this.frame.size.width / 2) ;
+  x = (x / -2) + (this.frame.size.width / 2);
   x = x - (this.sheet.size.width * scale / 2);
   var y = (this.sheet.size.height - (this.sheet.size.height * scale));
   y = (y / -2) + (this.frame.size.height / 2);
@@ -344,8 +367,8 @@ _.fitInitial = function() {
   this.sheet.size.height = this.fitScreenSize.height;
   this.sensorlayer.size.width = this.fitScreenSize.width;
   this.sensorlayer.size.height = this.fitScreenSize.height;
-  var xoff = ((this.frame.size.width/2) - (this.fitScreenSize.width / 2)) * -1;
-  var yoff = ((this.frame.size.height/2) - (this.fitScreenSize.height / 2)) * -1;
+  var xoff = ((this.frame.size.width / 2) - (this.fitScreenSize.width / 2)) * -1;
+  var yoff = ((this.frame.size.height / 2) - (this.fitScreenSize.height / 2)) * -1;
   this.sheet.setOffsets(xoff, yoff);
   this.sensorlayer.setOffsets(xoff, yoff);
   this.applyTransformation(x, y, scale);
@@ -456,7 +479,7 @@ _.continueAnimation = function() {
       this.startNextAnimationIteration();
     }
   } else {
-    if (this.animationStage == -1)  {
+    if (this.animationStage == -1) {
       //finihed going back to initial fit.
       this.animationStage = 0;
       this.setAnimationClass(false);
