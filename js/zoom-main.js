@@ -429,7 +429,6 @@ _.startNextAnimationIteration = function() {
  * @protected
  */
 _.continueAnimation = function() {
-  console.log('anomation ended')
   if (this.isAnimationRunning) {
     if (this.animationStage == -1) {
       this.animationStage = 0;
@@ -577,7 +576,6 @@ _.startSlideAnimation = function() {
  * @param {number} scale the scale.
  */
 _.applyTransformation = function(x, y, scale) {
-  console.log('aaaaaa', x, y, scale)
   pstj.lab.style.css.setTranslation(this.sheet.getElement(),
       x, y, undefined, 'scale(' + scale + ')');
   pstj.lab.style.css.setTranslation(this.sensorlayer.getElement(),
