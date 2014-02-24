@@ -358,7 +358,7 @@ _.fitInitial = function() {
  */
 _.startAnimation = function() {
   this.animationButton.setValue(zoom.text.stopAnimation);
-  //goog.style.setElementShown(this.eventBlocker_, true);
+  goog.style.setElementShown(this.eventBlocker_, true);
   if (!goog.math.Size.equals(this.sheet.size, this.fitScreenSize)) {
     // fit to initial size first.
     this.fitInitial();
@@ -591,10 +591,9 @@ _.applyTransformation = function(x, y, scale) {
  */
 _.showToolTip = function() {
   this.info.setModel(this.points.getCurrent());
-  var y_offset = (this.frame.size.height / 2) - this.info.size.height - 30;
+  var y_offset = (this.frame.size.height / 2) - this.info.size.height - 50;
   this.info.setActive(true, y_offset);
   this.hideTooltipDelay_.start();
-
 };
 
 
