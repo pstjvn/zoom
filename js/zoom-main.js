@@ -547,7 +547,10 @@ _.finishSlideAnimation = function() {
  * @protected
  */
 _.startSlideAnimation = function() {
-
+   if (!this.isAnimationRunning) {
+    this.fitInitial();
+    return;
+  }
   // add animation classes
   this.setAnimationClass(true);
 
