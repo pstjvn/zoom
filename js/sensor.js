@@ -4,6 +4,7 @@ goog.require('goog.dom');
 goog.require('goog.dom.classlist');
 goog.require('goog.ui.Control');
 goog.require('pstj.ds.ListItem');
+goog.require('pstj.ds.ListItem.EventType');
 goog.require('zoom.model.SensorModel');
 
 
@@ -24,16 +25,35 @@ var _ = zoom.component.Sensor.prototype;
 /** @inheritDoc */
 _.setModel = function(model) {
   goog.asserts.assertInstanceof(model, zoom.model.SensorModel);
+  if (!goog.isNull(this.getModel())) {
+    this.getHandler().unlisten(goog.asserts.assertInstanceof(this.getModel(),
+        pstj.ds.ListItem),
+        pstj.ds.ListItem.EventType.UPDATE, this.onModelUpdate);
+  }
   goog.base(this, 'setModel', model);
+  this.getHandler().listen(goog.asserts.assertInstanceof(
+      this.getModel(), pstj.ds.ListItem),
+      pstj.ds.ListItem.EventType.UPDATE, this.onModelUpdate);
 };
 
+
+/**
+ * Handles the model update event.
+ * @param {goog.events.Event} e The update event from the model.
+ * @protected
+ */
+_.onModelUpdate = function(e) {
+  e.stopPropagation();
+  goog.dom.setTextContent(this.getElementByClass(goog.getCssName('val')),
+      this.getModel().getFormatedValue());
+};
 
 /** @inheritDoc */
 _.enterDocument = function() {
   goog.dom.classlist.add(this.getElement(), goog.getCssName('sensor'));
   if (!goog.isNull(this.getModel())) {
     var span = goog.dom.createDom('span', goog.getCssName('val'));
-    goog.dom.setTextContent(span, '10%');
+    goog.dom.setTextContent(span, this.getModel().getFormatedValue());
     var size = this.getModel().getSize() + 'px';
     var halfSize = (this.getModel().getSize() / -2) + 'px';
     span.style.top = halfSize;

@@ -27,7 +27,8 @@ zoom.model.SensorModel.DEFS = {
   SIZE: 'size',
   NAME: 'name',
   UNIT: 'unit',
-  BACKGROUND_COLOR: 'dot_color'
+  BACKGROUND_COLOR: 'dot_color',
+  VALUE: 'current'
 };
 
 
@@ -44,6 +45,18 @@ _.getBorderStyle = function() {
   var color = goog.asserts.assertString(this.getProp(defs.BACKGROUND_COLOR));
   var size = goog.asserts.assertNumber(this.getProp(defs.SIZE));
   return Math.ceil(size) + 'px solid ' + color;
+};
+
+
+/**
+ * Getter for the formatted value.
+ * @return {string}
+ */
+_.getFormatedValue = function() {
+  var value = this.getProp(defs.VALUE);
+  if (goog.isNull(value)) return '';
+  return goog.asserts.assertString(
+      this.getProp(defs.VALUE) + this.getProp(defs.UNIT));
 };
 
 
