@@ -253,14 +253,14 @@ _.init_ = function() {
 
 /**
  * Handles the update value from the server.
- * @param {?} result The result object.
+ * @param {!goog.result.Result} result The result object.
  * @protected
  */
 _.onValuesUpdate = function(result) {
   if (result.getState() == goog.result.Result.State.SUCCESS) {
     var value = result.getValue();
     if (goog.isArray(value)) {
-      goog.array.forEach(value, function(item) {
+      goog.array.forEach(goog.asserts.assertArray(value), function(item) {
         var point = this.points.getById(item['id']);
         if (!goog.isNull(point)) {
           point.mutate('current', item['current']);
