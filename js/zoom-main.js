@@ -1,5 +1,6 @@
 goog.provide('zoom.control.Main');
 
+goog.require('goog.array');
 goog.require('goog.async.Delay');
 goog.require('goog.dom.classlist');
 goog.require('goog.events');
@@ -7,6 +8,7 @@ goog.require('goog.events.EventType');
 goog.require('goog.events.MouseWheelHandler');
 goog.require('goog.labs.net.xhr');
 goog.require('goog.math.Size');
+goog.require('goog.result.Result');
 goog.require('goog.style');
 goog.require('pstj.ds.List');
 goog.require('pstj.lab.style.css');
@@ -119,19 +121,13 @@ zoom.control.Main = function() {
    */
   this.fitScreenSize = null;
 
-  /**
-   * Pre=bound handler for the data on update.
-   * @type {function(?): void}
-   * @private
-   */
-  this.bound_ = this.onValuesUpdate.bind(this);
-
-
   this.updateDelay_ = new goog.async.Delay(function() {
     goog.labs.net.xhr.getJson(goog.asserts.assertString(
         pstj.configure.getRuntimeValue('VALUES_URL',
-        '/', 'AREOUS'))).then(this.bound_);
-  }, 1000, this);
+        '/', 'AREOUS'))).wait(this.onValuesUpdate, this);
+  }, goog.asserts.assertNumber(
+      pstj.configure.getRuntimeValue(
+          'UPDATE_INTERVAL', 1000, 'AREOUS')), this);
 
   this.hideTooltipDelay_ = new goog.async.Delay(function() {
     this.info.setActive(false);
@@ -149,8 +145,12 @@ goog.addSingletonGetter(zoom.control.Main);
  * @enum {string}
  */
 zoom.control.Main.DEFS = {
-  CB1: 'cubic-bezier(0, .10, .02, .74)',
-  CB2: 'cubic-bezier(.96, .31, .98, .91)'
+  CB1: goog.asserts.assertString(
+      pstj.configure.getRuntimeValue('CB1', 'cubic-bezier(0, .10, .02, .74)',
+          'AREOUS')),
+  CB2: goog.asserts.assertString(
+      pstj.configure.getRuntimeValue('CB2', 'cubic-bezier(.96, .31, .98, .91)',
+          'AREOUS'))
 };
 
 
@@ -201,8 +201,10 @@ _.init_ = function() {
   this.frame.addChild(this.sensorlayer);
 
 
-  var xoffset = ((this.frame.size.width / 2) - (this.sheet.size.width / 2)) * -1;
-  var yoffset = ((this.frame.size.height / 2) - (this.sheet.size.height / 2)) * -1;
+  var xoffset = ((this.frame.size.width / 2) -
+      (this.sheet.size.width / 2)) * -1;
+  var yoffset = ((this.frame.size.height / 2) -
+      (this.sheet.size.height / 2)) * -1;
 
   this.sheet.setOffsets(xoffset, yoffset);
   this.sensorlayer.setOffsets(xoffset, yoffset);
@@ -244,11 +246,29 @@ _.init_ = function() {
   // Give the broser time to render the large images.
   setTimeout(function() {
     goog.dom.removeNode(document.querySelector('.loader'));
-  }, 1000);
+    this.updateDelay_.start();
+  }.bind(this), 1000);
 };
 
-_.onValuesUpdate = function() {
 
+/**
+ * Handles the update value from the server.
+ * @param {?} result The result object.
+ * @protected
+ */
+_.onValuesUpdate = function(result) {
+  if (result.getState() == goog.result.Result.State.SUCCESS) {
+    var value = result.getValue();
+    if (goog.isArray(value)) {
+      goog.array.forEach(value, function(item) {
+        var point = this.points.getById(item['id']);
+        if (!goog.isNull(point)) {
+          point.mutate('current', item['current']);
+        }
+      }, this);
+    }
+  }
+  this.updateDelay_.start();
 };
 
 
@@ -367,8 +387,10 @@ _.fitInitial = function() {
   this.sheet.size.height = this.fitScreenSize.height;
   this.sensorlayer.size.width = this.fitScreenSize.width;
   this.sensorlayer.size.height = this.fitScreenSize.height;
-  var xoff = ((this.frame.size.width / 2) - (this.fitScreenSize.width / 2)) * -1;
-  var yoff = ((this.frame.size.height / 2) - (this.fitScreenSize.height / 2)) * -1;
+  var xoff = ((this.frame.size.width / 2) -
+      (this.fitScreenSize.width / 2)) * -1;
+  var yoff = ((this.frame.size.height / 2) -
+      (this.fitScreenSize.height / 2)) * -1;
   this.sheet.setOffsets(xoff, yoff);
   this.sensorlayer.setOffsets(xoff, yoff);
   this.applyTransformation(x, y, scale);
