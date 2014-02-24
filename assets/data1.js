@@ -35,5 +35,5 @@ var CONFIG = {
 {"id":"92","sensor_id":"50","floor_plan_id":"29","top":"857","left":"440","size":"sensor-size-small","font_color":"000000","dot_color":"FF0000","unit":"\u00b0C","description":"Desc","type":"Temperature","name":"Kitchen Temperature","current":"21"},
 {"id":"93","sensor_id":"52","floor_plan_id":"29","top":"726","left":"65","size":"sensor-size-big","font_color":"000000","dot_color":"FF0000","unit":"\u00b0C","description":"Desc","type":"Temperature","name":"Outside Temperature","current":"09"},
 {"id":"94","sensor_id":"54","floor_plan_id":"29","top":"385","left":"311","size":"sensor-size-small","font_color":"000000","dot_color":"FF0000","unit":"\u00b0C","description":"Desc","type":"Temperature","name":"Office Temperature 2","current":"322"},
-{"id":"95","sensor_id":"55","floor_plan_id":"29","top":"406","left":"367","size":"sensor-size-big","font_color":"000000","dot_color":"FF983D","unit":"A","description":"Desc","type":"Current","name":"Central AC Current"}]
+{"id":"95","sensor_id":"55","floor_plan_id":"29","top":"406","left":"367","size":"sensor-size-big","font_color":"000000","dot_color":"FF983D","unit":"A","description":"Desc","type":"Current","name":"Central AC Current", "current": "1"}]
 };
