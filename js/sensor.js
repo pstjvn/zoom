@@ -48,16 +48,18 @@ _.onModelUpdate = function(e) {
       this.getModel().getFormatedValue());
 };
 
+
 /** @inheritDoc */
 _.enterDocument = function() {
   goog.dom.classlist.add(this.getElement(), goog.getCssName('sensor'));
   if (!goog.isNull(this.getModel())) {
-    var span = goog.dom.createDom('span', goog.getCssName('val'));
+    var span = goog.dom.createDom('div', goog.getCssName('val'));
     goog.dom.setTextContent(span, this.getModel().getFormatedValue());
     var size = this.getModel().getSize() + 'px';
     var halfSize = (this.getModel().getSize() / -2) + 'px';
+    span.style.width = (this.getModel().getSize() * 2) + 'px';
     span.style.top = halfSize;
-    span.style.left = halfSize;
+    span.style.left = (this.getModel().getSize() * -1) + 'px';
     span.style.lineHeight = size;
     span.style.fontSize = halfSize;
     goog.dom.appendChild(this.getElement(), span);

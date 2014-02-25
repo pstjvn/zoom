@@ -3,6 +3,14 @@
   <head>
     <title>Floor plan presentation</title>
     <meta content="width=device-width, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <style>
+      html {
+        font-family: sans-serif;
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        font-size: 14px;
+      }
+    </style>
     <link rel="stylesheet" href="build/app.css">
     <script src="assets/data1.js"></script>
     <script>
@@ -16,8 +24,8 @@
           START_ANIMATION: 'Start animation',
           STOP_ANIMATION: 'Stop animation'
         },
-        // CB1: 'cubic bezier',
-        // CB2: 'cubic bezier',
+        CB1: 'linear',
+        CB2: 'linear',
         VALUES_URL: 'assets/update.js',
         UPDATE_INTERVAL: 2000,
         PRESENTATION_STEP_DURATION: 3, // in seconds

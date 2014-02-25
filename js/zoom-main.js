@@ -279,11 +279,11 @@ _.onValuesUpdate = function(result) {
  */
 _.getSensorSize = function(size) {
   if (size == 'sensor-size-small') {
-    return 15;
-  } else if (size == 'sensor-size-big') {
     return 25;
+  } else if (size == 'sensor-size-big') {
+    return 31;
   } else {
-    return 20;
+    return 28;
   }
 };
 
