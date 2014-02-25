@@ -44,8 +44,10 @@ _.setModel = function(model) {
  */
 _.onModelUpdate = function(e) {
   e.stopPropagation();
-  goog.dom.setTextContent(this.getElementByClass(goog.getCssName('val')),
-      this.getModel().getFormatedValue());
+  if (this.isInDocument()) {
+    goog.dom.setTextContent(this.getElementByClass(goog.getCssName('val')),
+        this.getModel().getFormatedValue());
+  }
 };
 
 
