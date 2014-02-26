@@ -8,8 +8,8 @@ goog.require('goog.events.EventType');
 goog.require('goog.events.MouseWheelHandler');
 goog.require('goog.labs.net.xhr');
 goog.require('goog.math.Size');
-goog.require('goog.result.Result');
 goog.require('goog.style');
+goog.require('goog.ui.Component.EventType');
 goog.require('pstj.ds.List');
 goog.require('pstj.lab.style.css');
 goog.require('pstj.math.utils');
@@ -121,10 +121,24 @@ zoom.control.Main = function() {
    */
   this.fitScreenSize = null;
 
+  /**
+   * @type {function(this: zoom.control.Main, ?): void}
+   * @private
+   */
+  this.bound_ = goog.bind(this.onUpdates, this);
+  /**
+   * @private
+   * @type {function(this:zoom.control.Main): void}
+   */
+  this.startUpdateDelay_ = goog.bind(function() {
+    this.updateDelay_.start();
+  }, this);
+
   this.updateDelay_ = new goog.async.Delay(function() {
     goog.labs.net.xhr.getJson(goog.asserts.assertString(
         pstj.configure.getRuntimeValue('VALUES_URL',
-        '/', 'AREOUS'))).wait(this.onValuesUpdate, this);
+        '/', 'AREOUS'))).then(this.bound_).thenAlways(
+        this.startUpdateDelay_);
   }, goog.asserts.assertNumber(
       pstj.configure.getRuntimeValue(
           'UPDATE_INTERVAL', 1000, 'AREOUS')), this);
@@ -243,6 +257,11 @@ _.init_ = function() {
         s.handleWheel(e);
       });
 
+  goog.events.listen(this.sensorlayer, goog.ui.Component.EventType.ENTER,
+      function(e) {
+        console.log(e.target);
+      });
+
   // Give the broser time to render the large images.
   setTimeout(function() {
     goog.dom.removeNode(document.querySelector('.loader'));
@@ -252,23 +271,19 @@ _.init_ = function() {
 
 
 /**
- * Handles the update value from the server.
- * @param {!goog.result.Result} result The result object.
+ * Handles the server updates fopr values.
+ * @param {Object|Array} result The server result parsed as json
  * @protected
  */
-_.onValuesUpdate = function(result) {
-  if (result.getState() == goog.result.Result.State.SUCCESS) {
-    var value = result.getValue();
-    if (goog.isArray(value)) {
-      goog.array.forEach(goog.asserts.assertArray(value), function(item) {
+_.onUpdates = function(result) {
+  if (goog.isArray(result)) {
+    goog.array.forEach(result, function(item) {
         var point = this.points.getById(item['id']);
         if (!goog.isNull(point)) {
           point.mutate('current', item['current']);
         }
       }, this);
-    }
   }
-  this.updateDelay_.start();
 };
 
 
@@ -547,7 +562,7 @@ _.finishSlideAnimation = function() {
  * @protected
  */
 _.startSlideAnimation = function() {
-   if (!this.isAnimationRunning) {
+  if (!this.isAnimationRunning) {
     this.fitInitial();
     return;
   }
