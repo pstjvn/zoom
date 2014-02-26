@@ -12,6 +12,11 @@ goog.require('zoom.component.Sensor');
  */
 zoom.component.SensorLayer = function() {
   goog.base(this);
+  /**
+   * @private
+   * @type {boolean}
+   */
+  this.scaling_ = false;
 };
 goog.inherits(zoom.component.SensorLayer, pstj.ui.TouchSheet);
 
@@ -25,6 +30,15 @@ _.setModel = function(model) {
   goog.asserts.assertInstanceof(model, pstj.ds.List);
   goog.base(this, 'setModel', model);
   this.createSensors();
+};
+
+
+/**
+ * Checks if currently the layer is scaled.
+ * @return {boolean}
+ */
+_.isScaling = function() {
+  return this.scaling_;
 };
 
 
@@ -56,6 +70,7 @@ _.clearSesonrs = function() {
 /** #inheritDoc */
 _.applySize = function() {
   goog.base(this, 'applySize');
+  this.scaling_ = false;
   goog.dom.classlist.remove(this.getElement(), goog.getCssName('scaling'));
 };
 
@@ -63,6 +78,7 @@ _.applySize = function() {
 /** @inheritDoc */
 _.handleWheel = function(e) {
   goog.dom.classlist.add(this.getElement(), goog.getCssName('scaling'));
+  this.scaling_ = true;
   goog.base(this, 'handleWheel', e);
 };
 

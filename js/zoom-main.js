@@ -3,13 +3,13 @@ goog.provide('zoom.control.Main');
 goog.require('goog.array');
 goog.require('goog.async.Delay');
 goog.require('goog.dom.classlist');
-goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.events.MouseWheelHandler');
 goog.require('goog.labs.net.xhr');
 goog.require('goog.math.Size');
 goog.require('goog.style');
 goog.require('goog.ui.Component.EventType');
+goog.require('pstj.control.Base');
 goog.require('pstj.ds.List');
 goog.require('pstj.lab.style.css');
 goog.require('pstj.math.utils');
@@ -18,6 +18,7 @@ goog.require('pstj.ui.SheetFrame');
 goog.require('pstj.ui.Touchable.EventType');
 goog.require('zoom.component.FloorPlan');
 goog.require('zoom.component.Info');
+goog.require('zoom.component.Sensor');
 goog.require('zoom.component.SensorLayer');
 goog.require('zoom.model.FloorModel');
 goog.require('zoom.model.SensorModel');
@@ -29,8 +30,10 @@ goog.require('zoom.text');
 /**
  * The main app controller. Most of the logic is hosted here.
  * @constructor
+ * @extends {pstj.control.Base}
  */
 zoom.control.Main = function() {
+  goog.base(this);
   /**
    * The scale ratio that should be used when in presentation mode.
    * It is set by the JSON data in the floor plan section.
@@ -147,8 +150,9 @@ zoom.control.Main = function() {
     this.info.setActive(false);
   }, 2000, this);
 
-  this.init_();
+  this.initialize();
 };
+goog.inherits(zoom.control.Main, pstj.control.Base);
 goog.addSingletonGetter(zoom.control.Main);
 
 
@@ -173,11 +177,8 @@ var _ = zoom.control.Main.prototype;
 var defs = zoom.control.Main.DEFS;
 
 
-/**
- * Initialize the controller.
- * @private
- */
-_.init_ = function() {
+/** @inheritDoc */
+_.initialize = function() {
   goog.dom.appendChild(document.body,
       goog.dom.htmlToDocumentFragment(zoom.template.main({})));
 
@@ -225,10 +226,11 @@ _.init_ = function() {
   this.sheet.update();
   this.sensorlayer.update();
 
-  goog.events.listen(this.sheet.getElement(),
-      goog.events.EventType.TRANSITIONEND, this.continueAnimation.bind(this));
+  this.getHandler().listen(this.sheet.getElement(),
+    goog.events.EventType.TRANSITIONEND, this.continueAnimation);
 
-  goog.events.listen(this.animationButton, goog.ui.Component.EventType.ACTION,
+  this.getHandler().listen(this.animationButton,
+      goog.ui.Component.EventType.ACTION,
       function(e) {
         if (!this.isAnimationRunning) {
           this.isAnimationRunning = true;
@@ -237,36 +239,50 @@ _.init_ = function() {
           this.isAnimationRunning = false;
           this.stopAnimation();
         }
-      }.bind(this));
+      });
 
-  var s = this.sheet;
-
-  // redirect touch events to the floor plan layer.
-  goog.events.listen(this.sensorlayer, [
+  this.getHandler().listen(this.sensorlayer, [
     pstj.ui.Touchable.EventType.MOVE,
     pstj.ui.Touchable.EventType.PRESS,
     pstj.ui.Touchable.EventType.RELEASE
   ], function(e) {
-    s.dispatchEvent(e);
+    this.sheet.dispatchEvent(e);
   });
 
-  goog.events.listen((new goog.events.MouseWheelHandler(
+  this.getHandler().listen((new goog.events.MouseWheelHandler(
       this.sensorlayer.getElement())),
       goog.events.MouseWheelHandler.EventType.MOUSEWHEEL,
       function(e) {
-        s.handleWheel(e);
+        this.sheet.handleWheel(e);
       });
 
-  goog.events.listen(this.sensorlayer, goog.ui.Component.EventType.ENTER,
-      function(e) {
-        console.log(e.target);
-      });
+  this.getHandler().listen(this.sensorlayer, goog.ui.Component.EventType.ENTER,
+      this.handleSensorHover);
+
+  this.getHandler().listen(this.info, goog.ui.Component.EventType.ACTION,
+    this.handleInfoActionButtons);
+
+  // reset tip position
+  this.info.setActive(true, this.frame.size, 0);
+  this.info.setActive(false);
 
   // Give the broser time to render the large images.
   setTimeout(function() {
     goog.dom.removeNode(document.querySelector('.loader'));
     this.updateDelay_.start();
   }.bind(this), 1000);
+};
+
+
+/**
+ * Handles the action buttons in the popup tooltip.
+ * @param {goog.events.Event} e The ACTION event.
+ * @protected
+ */
+_.handleInfoActionButtons = function(e) {
+  var button = (/** @type {pstj.ui.Button} */(e.target));
+  var action = button.getActionName();
+  console.log('Action name was:', action);
 };
 
 
@@ -284,6 +300,24 @@ _.onUpdates = function(result) {
         }
       }, this);
   }
+};
+
+
+/**
+ * Handles the hover when there is no animation.
+ * @param {goog.events.Event} e The wrapped ENTER event.
+ * @protected
+ */
+_.handleSensorHover = function(e) {
+  if (this.sensorlayer.isScaling()) return;
+  if (this.isAnimationRunning) return;
+  var sensor = goog.asserts.assertInstanceof(e.target, zoom.component.Sensor);
+  var model = sensor.getModel();
+  // calculate the x/y of the sensor on the screen.
+  var coord = goog.style.getPosition(sensor.getElement()).translate(
+    this.sensorlayer.getOffset());
+  this.info.setModel(model);
+  this.info.showOnCoordinate(coord, this.frame.size, model.getSize());
 };
 
 
@@ -418,6 +452,7 @@ _.fitInitial = function() {
  */
 _.startAnimation = function() {
   this.animationButton.setValue(zoom.text.stopAnimation);
+  this.info.setActive(false);
   goog.style.setElementShown(this.eventBlocker_, true);
   if (!goog.math.Size.equals(this.sheet.size, this.fitScreenSize)) {
     // fit to initial size first.
@@ -527,6 +562,7 @@ _.continueAnimation = function() {
       this.sensorlayer.update();
       return;
     } else if (this.animationStage == 0) {
+      this.info.setAnimationMode(false);
       // we just finished the initial step, revert to original state
       this.fitInitial();
     } else if (this.animationStage == 1) {
@@ -534,6 +570,7 @@ _.continueAnimation = function() {
       this.animationStage = 2;
       this.finishSlideAnimation();
     } else if (this.animationStage == 2) {
+      this.info.setAnimationMode(false);
       this.fitInitial();
     }
   }
@@ -652,8 +689,9 @@ _.applyTransformation = function(x, y, scale) {
  */
 _.showToolTip = function() {
   this.info.setModel(this.points.getCurrent());
-  var y_offset = (this.frame.size.height / 2) - this.info.size.height - 50;
-  this.info.setActive(true, y_offset);
+  this.info.setAnimationMode(true);
+  this.info.setActive(true, this.frame.size,
+      this.points.getCurrent().getSize());
   this.hideTooltipDelay_.start();
 };
 

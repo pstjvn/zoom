@@ -2,6 +2,9 @@ goog.provide('zoom.component.Info');
 
 goog.require('goog.dom.classlist');
 goog.require('goog.style');
+goog.require('goog.ui.ControlRenderer');
+goog.require('pstj.ui.Button');
+goog.require('pstj.ui.CustomButtonRenderer');
 goog.require('pstj.ui.Template');
 goog.require('pstj.ui.Templated');
 goog.require('pstj.ui.ngAgent');
@@ -39,13 +42,57 @@ _.getTemplate = function() {
  */
 zoom.component.Info = function() {
   goog.base(this, zoom.component.InfoTemplate.getInstance());
+  /**
+   * Reference the size of the tip.
+   * @type {goog.math.Size}
+   */
   this.size = null;
+  this.graphButton = new pstj.ui.Button(
+      (/** @type {goog.ui.ButtonRenderer} */(
+      goog.ui.ControlRenderer.getCustomRenderer(
+          pstj.ui.CustomButtonRenderer, goog.getCssName('tip-button')))));
+  this.pinButton = new pstj.ui.Button(
+      (/** @type {goog.ui.ButtonRenderer} */(
+      goog.ui.ControlRenderer.getCustomRenderer(
+          pstj.ui.CustomButtonRenderer, goog.getCssName('tip-button')))));
+  this.closeButton = new pstj.ui.Button(
+      (/** @type {goog.ui.ButtonRenderer} */(
+      goog.ui.ControlRenderer.getCustomRenderer(
+          pstj.ui.CustomButtonRenderer, goog.getCssName('close-button')))));
+
+  this.addChild(this.graphButton);
+  this.addChild(this.pinButton);
+  this.addChild(this.closeButton);
+  /**
+   * The tip element.
+   * @type {?Element}
+   * @protected
+   */
+  this.tip = null;
+  /**
+   * The size of the tip. Used in calculation.
+   * @type {number}
+   * @protected
+   */
+  this.tipSize = 0;
 };
 goog.inherits(zoom.component.Info, pstj.ui.Templated);
 
 
+/**
+ * @enum {string}
+ */
+zoom.component.Info.TipOrientation = {
+  TOP: 'top',
+  BOTTOM: 'bottom',
+  LEFT: 'left',
+  RIGHT: 'right'
+};
+
+
 goog.scope(function() {
 var _ = zoom.component.Info.prototype;
+var o = zoom.component.Info.TipOrientation;
 
 
 /** @inheritDoc */
@@ -57,9 +104,43 @@ _.setModel = function(model) {
 
 
 /** @inheritDoc */
+_.render = function(el) {
+  goog.base(this, 'render', el);
+  this.graphButton.decorate(this.querySelector('.' + goog.getCssName('graph')));
+  this.pinButton.decorate(this.querySelector('.' + goog.getCssName('pin')));
+  this.closeButton.decorate(this.querySelector('.' + goog.getCssName('close')));
+};
+
+
+/** @inheritDoc */
 _.enterDocument = function() {
   goog.base(this, 'enterDocument');
+  this.tip = this.querySelector('.' + goog.getCssName('tip'));
+  this.getHandler().listen(this.closeButton, goog.ui.Component.EventType.ACTION,
+      this.onCloseButtonAction);
   this.size = goog.style.getSize(this.getElement());
+  this.tipSize = goog.style.getSize(this.tip).width;
+};
+
+
+/**
+ * Handles the activation of the close button.
+ * @param {goog.events.Event} e The ACTION event.
+ * @protected
+ */
+_.onCloseButtonAction = function(e) {
+  e.stopPropagation();
+  this.setActive(false);
+};
+
+
+/**
+ * Enables the animation mode for the tip.
+ * @param {boolean} enable If true sets the needed class.
+ */
+_.setAnimationMode = function(enable) {
+  goog.dom.classlist.enable(this.getElement(),
+      goog.getCssName('animation-mode'), enable);
 };
 
 
@@ -67,13 +148,95 @@ _.enterDocument = function() {
  * Sets the active sttae of the component.
  * The implementation is in CSS.
  * @param {boolean} active If true the active class will be added.
- * @param {number=} opt_offset The offset to send the tooltip to.
+ * @param {goog.math.Size=} opt_ss Current screen size.
+ * @param {number=} opt_cs The size of the circle.
  */
-_.setActive = function(active, opt_offset) {
-  if (!goog.isNumber(opt_offset)) opt_offset = -200;
-  goog.dom.classlist.enable(this.getElement(), goog.getCssName('active'),
-      active);
-  pstj.lab.style.css.setTranslation(this.getElement(), 0, opt_offset);
+_.setActive = function(active, opt_ss, opt_cs) {
+  var x = 0;
+  var y = 0;
+  if (active) {
+    if (!goog.isDef(opt_ss) || !goog.isNumber(opt_cs)) {
+      throw new Error('Cannot position without screen size');
+    }
+    if (goog.isNull(this.cachedSize_) || !goog.math.Size.equals(
+        this.cachedSize_, goog.asserts.assertInstanceof(opt_ss,
+            goog.math.Size))) {
+      this.cachedSize_ = goog.asserts.assertInstanceof(opt_ss,
+          goog.math.Size).clone();
+    }
+    // we are at 0,0, we need to go to exact ceneter - out
+    // full height and minus half our width
+    x = (this.cachedSize_.width / 2) - (this.size.width / 2);
+    y = (this.cachedSize_.height / 2) - this.size.height - this.tipSize -
+        opt_cs;
+    this.setTip(o.BOTTOM);
+  } else {
+    x = x = (this.cachedSize_.width / 2) - (this.size.width / 2);
+    y = this.size.height * -1 - this.tipSize;
+  }
+  pstj.lab.style.css.setTranslation(this.getElement(), x, y);
+};
+
+
+/**
+ * Shows the tooltip on the desired coordinate.
+ * @param {goog.math.Coordinate} coord The x.y where the tooltip should.
+ * @param {goog.math.Size} viewsize The size to which to castrate the view.
+ * position itself.
+ * @param {number} yadd The value to add to the Y coordinate if needed to
+ * match the point position.
+ */
+_.showOnCoordinate = function(coord, viewsize, yadd) {
+  var x = coord.x - (this.size.width / 2);
+  var y = coord.y - this.size.height - this.tipSize - yadd;
+  this.setTip(o.BOTTOM);
+  if (y < 0) {
+    // we need to revert the calculation
+    y = coord.y + this.tipSize + yadd;
+    this.setTip(o.TOP);
+  }
+  if (x < 0) {
+    // put it on the right side.
+    this.setTip(o.RIGHT);
+    x = coord.x + this.tipSize + yadd;
+    y = coord.y - (this.size.height / 2);
+  }
+
+  if (x + this.size.width > viewsize.width) {
+    // put it on the left side.
+    this.setTip(o.LEFT);
+    x = coord.x - this.size.width - this.tipSize - yadd;
+    y = coord.y - (this.size.height / 2);
+  }
+  pstj.lab.style.css.setTranslation(this.getElement(), x, y);
+
+};
+
+
+/**
+ * Sets the tip position.
+ * @param {o} orientation The orientation of the tip.
+ * @protected
+ */
+_.setTip = function(orientation) {
+  var x = 0;
+  var y = 0;
+  if (orientation == o.TOP) {
+    x = (this.size.width / 2) - (this.tipSize / 2);
+    y = this.tipSize / -2;
+  } else if (orientation == o.BOTTOM) {
+    x = (this.size.width / 2) - (this.tipSize / 2);
+    y = this.size.height - (this.tipSize / 2);
+  } else if (orientation == o.RIGHT) {
+    x = this.tipSize / -2;
+    y = (this.size.height / 2) - (this.tipSize / 2);
+  } else if (orientation == o.LEFT) {
+    x = this.size.width - (this.tipSize / 2);
+    y = (this.size.height / 2) - (this.tipSize / 2);
+  }
+
+  pstj.lab.style.css.setTranslation(this.querySelector('.' +
+      goog.getCssName('tip')), x, y, undefined, ' rotate(45deg)');
 };
 
 });  // goog.scope

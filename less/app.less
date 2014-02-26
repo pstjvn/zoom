@@ -43,6 +43,17 @@ html, body, .container {
   .transition(none);
 }
 
+.animation-mode .buttons  {
+  display: none;
+}
+
+.information {
+  display: none;
+}
+
+.animation-mode .information {
+  display: block;
+}
 
 .sensor {
   width: 0;
@@ -56,48 +67,50 @@ html, body, .container {
   outline: none;
 }
 
-.info-container {
+.inner-sensor {
   text-align: center;
+  top: 0;
+  left: 0;
+  width: 270px;
+  height: 159px;
+  background-color: #8eb9ff;
+}
+
+.sensor-info {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 128px;
+  padding: 4px;
+  width: 270px;
+  height: 160px;
+  background-color: #004514;
+  // border: 4px solid #004514;
+  box-shadow: 0 0 5px black;
   .translation(0, -200px);
   .transitiontranslate(500ms cubic-bezier(0.715, -0.255, 0.610, 1.325));
 }
 
-.info-container.active {
-  opacity: 1;
-}
+// .sensor-info:after {
+//   content: "";
+//   width: 20px;
+//   height: 20px;
+//   // border-left: 20px solid transparent;
+//   // border-right: 20px solid transparent;
+//   // border-top: 20px solid #8eb9ff;
+//   position: absolute;
+//   left: 50%;
+//   bottom: -10px;
+//   margin-left: -9px;
+//   background-color: #004514;
+//   box-shadow: 2px 2px 2px rgba(0,0,0,0.4);
+//   -webkit-transform: rotate(45deg);
+//   -moz-transform: rotate(45deg);
+//   -ms-transform: rotate(45deg);
+//   transform: rotate(45deg);
+//   z-index: -1;
+// }
 
-.sensor-info {
-  display: inline-block;
-  width: 270px;
-  height: 128px;
-  background-color: #8eb9ff;
-  border: 4px solid blue;
-  box-shadow: 0 0 5px black;
-}
 
-.sensor-info:after {
-  content: "";
-  width: 20px;
-  height: 20px;
-  // border-left: 20px solid transparent;
-  // border-right: 20px solid transparent;
-  // border-top: 20px solid #8eb9ff;
-  position: absolute;
-  left: 50%;
-  bottom: -14px;
-  margin-left: -9px;
-  background-color: #8eb9ff;
-  box-shadow: 2px 2px 2px rgba(0,0,0,0.4);
-  -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  transform: rotate(45deg);
-}
 
 .goog-control-hover {
   z-index: 2;
@@ -141,4 +154,48 @@ html, body, .container {
   height: 80px;
   color: white;
   font-size: 400%;
+}
+
+.graph {
+  border-right: 2px solid white;
+}
+// 32px
+.buttons {
+  height: 33px;
+}
+//32 px
+.tip-button {
+  width: 134px;
+  outline: none;
+  background: #61ad52;
+  color: white;
+  float: left;
+  cursor: pointer;
+  border-top: 2px solid white;
+  line-height: 30px;
+  font-size: 14px;
+}
+
+.close-button {
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.tip {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  background-color: #004514;
+  box-shadow: 0 0 4px rgba(0,0,0,0.4);
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
 }
