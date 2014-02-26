@@ -80,13 +80,17 @@ goog.inherits(zoom.component.Info, pstj.ui.Templated);
 
 
 /**
- * @enum {string}
+ * @enum {number}
  */
 zoom.component.Info.TipOrientation = {
-  TOP: 'top',
-  BOTTOM: 'bottom',
-  LEFT: 'left',
-  RIGHT: 'right'
+  TOP: 0,
+  BOTTOM: 1,
+  LEFT: 2,
+  RIGHT: 3,
+  TOP_LEFT: 4,
+  TOP_RIGHT: 5,
+  BOTTOM_LEFT: 6,
+  BOTTOM_RIGHT: 7
 };
 
 
@@ -164,7 +168,7 @@ _.setActive = function(active, opt_ss, opt_cs) {
       this.cachedSize_ = goog.asserts.assertInstanceof(opt_ss,
           goog.math.Size).clone();
     }
-    // we are at 0,0, we need to go to exact ceneter - out
+    // we are at 0,0, we need to go to exact ceneter minus our
     // full height and minus half our width
     x = (this.cachedSize_.width / 2) - (this.size.width / 2);
     y = (this.cachedSize_.height / 2) - this.size.height - this.tipSize -
@@ -190,24 +194,58 @@ _.showOnCoordinate = function(coord, viewsize, yadd) {
   var x = coord.x - (this.size.width / 2);
   var y = coord.y - this.size.height - this.tipSize - yadd;
   this.setTip(o.BOTTOM);
+
+  // top left corner
+  if (y < 0 && x < 0) {
+    x = coord.x + this.tipSize + yadd;
+    y = coord.y + this.tipSize;
+    this.setTip(o.TOP_LEFT);
+  }
+
+  // top right corner
+  if (y < 0 && x + this.size.width > viewsize.width) {
+    x = coord.x - this.size.width - this.tipSize - yadd;
+    y = coord.y + this.tipSize;
+    this.setTip(o.TOP_RIGHT);
+  }
+
+  // bottom left corner
+  // U can never be less than the screen 'coz the point would not be
+  // visible so we check only X
+  if (x < 0) {
+    // initially calculate side view (tip on the RIGHT)
+    x = coord.x + this.tipSize + yadd;
+    y = coord.y - (this.size.height / 2);
+    this.setTip(o.RIGHT);
+    // now check if we are still into view.
+    if (y + this.size.height > viewsize.height) {
+      // ops we are too low, move to bottom left.
+      y = coord.y - this.size.height;
+      this.setTip(o.BOTTOM_LEFT);
+    }
+  }
+
+  // bottom right corner.
+  if (x + this.size.width > viewsize.width) {
+    // position for left side view.
+    x = coord.x - this.size.width - this.tipSize - yadd;
+    y = coord.y - (this.size.height / 2);
+    this.setTip(o.LEFT);
+    // now check if we are still completely into view.
+    if (y + this.size.height > viewsize.height) {
+      // position bottom right
+      y = coord.y - this.size.height;
+      this.setTip(o.BOTTOM_RIGHT);
+    }
+  }
+
+  // tip is too hight (top is out of screen)
   if (y < 0) {
     // we need to revert the calculation
     y = coord.y + this.tipSize + yadd;
     this.setTip(o.TOP);
   }
-  if (x < 0) {
-    // put it on the right side.
-    this.setTip(o.RIGHT);
-    x = coord.x + this.tipSize + yadd;
-    y = coord.y - (this.size.height / 2);
-  }
 
-  if (x + this.size.width > viewsize.width) {
-    // put it on the left side.
-    this.setTip(o.LEFT);
-    x = coord.x - this.size.width - this.tipSize - yadd;
-    y = coord.y - (this.size.height / 2);
-  }
   pstj.lab.style.css.setTranslation(this.getElement(), x, y);
 
 };
@@ -221,6 +259,7 @@ _.showOnCoordinate = function(coord, viewsize, yadd) {
 _.setTip = function(orientation) {
   var x = 0;
   var y = 0;
+  var addition = ' rotate(45deg)';
   if (orientation == o.TOP) {
     x = (this.size.width / 2) - (this.tipSize / 2);
     y = this.tipSize / -2;
@@ -233,10 +272,26 @@ _.setTip = function(orientation) {
   } else if (orientation == o.LEFT) {
     x = this.size.width - (this.tipSize / 2);
     y = (this.size.height / 2) - (this.tipSize / 2);
+  } else if (orientation == o.TOP_LEFT) {
+    x = 0;
+    y = 0;
+    addition = ' skew(45deg)';
+  } else if (orientation == o.TOP_RIGHT) {
+    x = this.size.width - this.tipSize;
+    y = 0;
+    addition = ' skew(-45deg)';
+  } else if (orientation == o.BOTTOM_LEFT) {
+    x = 0;
+    y = this.size.height - this.tipSize;
+    addition = ' skew(-45deg)';
+  } else if (orientation == o.BOTTOM_RIGHT) {
+    x = this.size.width - this.tipSize;
+    y = this.size.height - this.tipSize;
+    addition = 'skew(45deg)';
   }
 
   pstj.lab.style.css.setTranslation(this.querySelector('.' +
-      goog.getCssName('tip')), x, y, undefined, ' rotate(45deg)');
+      goog.getCssName('tip')), x, y, undefined, addition);
 };
 
 });  // goog.scope
