@@ -556,6 +556,7 @@ _.continueAnimation = function() {
       this.animationStage = 0;
       this.setAnimationClass(false);
       goog.style.setElementShown(this.eventBlocker_, false);
+      this.info.setAnimationMode(false);
       this.sheet.applySize();
       this.sensorlayer.applySize();
       this.sheet.update();
