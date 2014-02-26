@@ -227,7 +227,7 @@ _.initialize = function() {
   this.sensorlayer.update();
 
   this.getHandler().listen(this.sheet.getElement(),
-    goog.events.EventType.TRANSITIONEND, this.continueAnimation);
+      goog.events.EventType.TRANSITIONEND, this.continueAnimation);
 
   this.getHandler().listen(this.animationButton,
       goog.ui.Component.EventType.ACTION,
@@ -260,7 +260,7 @@ _.initialize = function() {
       this.handleSensorHover);
 
   this.getHandler().listen(this.info, goog.ui.Component.EventType.ACTION,
-    this.handleInfoActionButtons);
+      this.handleInfoActionButtons);
 
   // reset tip position
   this.info.setActive(true, this.frame.size, 0);
@@ -288,17 +288,17 @@ _.handleInfoActionButtons = function(e) {
 
 /**
  * Handles the server updates fopr values.
- * @param {Object|Array} result The server result parsed as json
+ * @param {Object|Array} result The server result parsed as json.
  * @protected
  */
 _.onUpdates = function(result) {
   if (goog.isArray(result)) {
     goog.array.forEach(result, function(item) {
-        var point = this.points.getById(item['id']);
-        if (!goog.isNull(point)) {
-          point.mutate('current', item['current']);
-        }
-      }, this);
+      var point = this.points.getById(item['id']);
+      if (!goog.isNull(point)) {
+        point.mutate('current', item['current']);
+      }
+    }, this);
   }
 };
 
@@ -315,7 +315,7 @@ _.handleSensorHover = function(e) {
   var model = sensor.getModel();
   // calculate the x/y of the sensor on the screen.
   var coord = goog.style.getPosition(sensor.getElement()).translate(
-    this.sensorlayer.getOffset());
+      this.sensorlayer.getOffset());
   this.info.setModel(model);
   this.info.showOnCoordinate(coord, this.frame.size, model.getSize());
 };
