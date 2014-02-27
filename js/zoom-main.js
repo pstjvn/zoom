@@ -222,6 +222,8 @@ _.initialize = function() {
       (this.sheet.size.width / 2)) * -1;
   var yoffset = ((this.frame.size.height / 2) -
       (this.sheet.size.height / 2)) * -1;
+  xoffset = parseFloat(xoffset.toFixed(8));
+  yoffset = parseFloat(yoffset.toFixed(8));
 
   this.sheet.setOffsets(xoffset, yoffset);
   this.sensorlayer.setOffsets(xoffset, yoffset);
