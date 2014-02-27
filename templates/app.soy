@@ -3,6 +3,7 @@
 
 /**
  * The main template for the app.
+ * @param items The list of other floor plans.
  */
 {template .main}
   <div class="{css container}">
@@ -11,6 +12,13 @@
     <div class="{css event-blocker}"></div>
   </div>
   <div class="{css trigger-button}"></div>
+  <div class="{css switcher-container}">
+    <div class="{css switcher-inner}">
+      {call .switcher}
+        {param items: $items /}
+      {/call}
+    </div>
+  </div>
 {/template}
 
 
@@ -36,6 +44,21 @@
       <div class="{css information}"></div>
     </div>
     <div class="{css tip}"></div>
-    <div class="{css close}"></div>
+    <div class="{css close} {css close-button}"></div>
+  </div>
+{/template}
+
+
+/**
+ * Switcher template
+ * @param items
+ */
+{template .switcher}
+  <div class="{css switcher}">
+    <ul>
+      {foreach $item in $items}
+        <li><a href="{$item.link}"><img src="{$item.image}"></a></li>
+      {/foreach}
+    </ul>
   </div>
 {/template}

@@ -180,7 +180,9 @@ var defs = zoom.control.Main.DEFS;
 /** @inheritDoc */
 _.initialize = function() {
   goog.dom.appendChild(document.body,
-      goog.dom.htmlToDocumentFragment(zoom.template.main({})));
+      goog.dom.htmlToDocumentFragment(zoom.template.main({
+        items: goog.global['LIST']
+      })));
 
   this.frame.decorate(document.querySelector('.' +
       goog.getCssName('container')));
