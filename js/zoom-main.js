@@ -286,7 +286,11 @@ _.initialize = function() {
 _.handleInfoActionButtons = function(e) {
   var button = (/** @type {pstj.ui.Button} */(e.target));
   var action = button.getActionName();
-  console.log('Action name was:', action);
+  goog.labs.net.xhr.get(goog.asserts.assertString(
+      pstj.configure.getRuntimeValue(((action == 'pin') ? 'PIN_URL' :
+          'GRAPH_URL'), '/', 'AREOUS') +
+          this.info.getModel().getId().toString()
+      ));
 };
 
 
