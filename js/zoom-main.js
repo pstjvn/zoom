@@ -179,9 +179,25 @@ var defs = zoom.control.Main.DEFS;
 
 /** @inheritDoc */
 _.initialize = function() {
+  var list = [];
+
+  var obj = goog.global['LIST'];
+
+  if (goog.isArray(obj)) {
+    goog.array.forEach(obj, function(item) {
+      list.push({
+        id: item['id'],
+        link: item['link'],
+        image: item['image']
+      })
+    })
+  } else {
+    throw new Error("List of floor plans not found");
+  }
+
   goog.dom.appendChild(document.body,
       goog.dom.htmlToDocumentFragment(zoom.template.main({
-        items: goog.global['LIST']
+        items: list
       })));
 
   this.frame.decorate(document.querySelector('.' +
