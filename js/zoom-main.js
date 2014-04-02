@@ -35,6 +35,15 @@ goog.require('zoom.text');
 zoom.control.Main = function() {
   goog.base(this);
   /**
+   * Provides way to access globally defined action decider for the info
+   * panel action buttons.
+   * @type {?function(?string, pstj.ds.RecordID): void}
+   */
+  this.globalInfoHandler_ = null;
+  goog.exportSymbol('AREOUS.setInfoClickHander', goog.bind(function(fn) {
+    this.globalInfoHandler_ = fn;
+  }, this));
+  /**
    * The scale ratio that should be used when in presentation mode.
    * It is set by the JSON data in the floor plan section.
    * @type {number}
@@ -180,7 +189,9 @@ var defs = zoom.control.Main.DEFS;
 /** @inheritDoc */
 _.initialize = function() {
   goog.dom.appendChild(document.body,
-      goog.dom.htmlToDocumentFragment(zoom.template.main({})));
+      goog.dom.htmlToDocumentFragment(zoom.template.main({
+        items: goog.global['LIST']
+      })));
 
   this.frame.decorate(document.querySelector('.' +
       goog.getCssName('container')));
@@ -256,8 +267,8 @@ _.initialize = function() {
         this.sheet.handleWheel(e);
       });
 
-  this.getHandler().listen(this.sensorlayer, goog.ui.Component.EventType.ENTER,
-      this.handleSensorHover);
+  this.getHandler().listen(this.sensorlayer, [goog.ui.Component.EventType.ENTER,
+      goog.ui.Component.EventType.ACTION], this.handleSensorHover);
 
   this.getHandler().listen(this.info, goog.ui.Component.EventType.ACTION,
       this.handleInfoActionButtons);
@@ -282,7 +293,9 @@ _.initialize = function() {
 _.handleInfoActionButtons = function(e) {
   var button = (/** @type {pstj.ui.Button} */(e.target));
   var action = button.getActionName();
-  console.log('Action name was:', action);
+  if (goog.isFunction(this.globalInfoHandler_)) {
+    this.globalInfoHandler_(action, this.info.getModel().getId());
+  }
 };
 
 
@@ -313,6 +326,7 @@ _.handleSensorHover = function(e) {
   if (this.isAnimationRunning) return;
   var sensor = goog.asserts.assertInstanceof(e.target, zoom.component.Sensor);
   var model = sensor.getModel();
+  if (model == this.info.getModel()) return;
   // calculate the x/y of the sensor on the screen.
   var coord = goog.style.getPosition(sensor.getElement()).translate(
       this.sensorlayer.getOffset());
