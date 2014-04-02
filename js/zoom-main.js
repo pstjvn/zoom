@@ -188,9 +188,25 @@ var defs = zoom.control.Main.DEFS;
 
 /** @inheritDoc */
 _.initialize = function() {
+  var list = [];
+
+  var obj = goog.global['LIST'];
+
+  if (goog.isArray(obj)) {
+    goog.array.forEach(obj, function(item) {
+      list.push({
+        id: item['id'],
+        link: item['link'],
+        image: item['image']
+      })
+    })
+  } else {
+    throw new Error("List of floor plans not found");
+  }
+
   goog.dom.appendChild(document.body,
       goog.dom.htmlToDocumentFragment(zoom.template.main({
-        items: goog.global['LIST']
+        items: list
       })));
 
   this.frame.decorate(document.querySelector('.' +
@@ -231,6 +247,8 @@ _.initialize = function() {
       (this.sheet.size.width / 2)) * -1;
   var yoffset = ((this.frame.size.height / 2) -
       (this.sheet.size.height / 2)) * -1;
+  xoffset = parseFloat(xoffset.toFixed(8));
+  yoffset = parseFloat(yoffset.toFixed(8));
 
   this.sheet.setOffsets(xoffset, yoffset);
   this.sensorlayer.setOffsets(xoffset, yoffset);
