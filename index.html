@@ -57,17 +57,24 @@
       Loading...
     </div>
     <!-- remove those in production mode -->
-
+<!--
     <script src="build/app-cssmap.js"></script>
     <script src="../../library/closure/goog/base.js"></script>
     <script src="../pstj/deps.js"></script>
     <script src="../../templates/deps.js"></script>
     <script src="build/deps.js"></script>
     <script>goog.require('app');</script>
-
+ -->
     <!-- enable this in production mode -->
 
-    <!--<script src="build/app.build.js"></script>-->
+    <script src="build/app.build.js"></script>
 
+
+    <script>
+      // Example of using global click handler on info
+      AREOUS.setInfoClickHander(function(action, id) {
+        console.log('Externalized handler', action, id);
+      })
+    </script
   </body>
 </html>
