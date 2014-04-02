@@ -5,6 +5,7 @@ goog.require('goog.dom.classlist');
 goog.require('goog.ui.Control');
 goog.require('pstj.ds.ListItem');
 goog.require('pstj.ds.ListItem.EventType');
+goog.require('pstj.ui.TouchAgent');
 goog.require('zoom.model.SensorModel');
 
 
@@ -76,6 +77,7 @@ _.enterDocument = function() {
     throw new Error('Cannot process without data model');
   }
   goog.base(this, 'enterDocument');
+  pstj.ui.TouchAgent.getInstance().attach(this);
 };
 
 });  // goog.scope
