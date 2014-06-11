@@ -344,7 +344,7 @@ _.handleSensorHover = function(e) {
   if (this.isAnimationRunning) return;
   var sensor = goog.asserts.assertInstanceof(e.target, zoom.component.Sensor);
   var model = sensor.getModel();
-  if (model == this.info.getModel()) return;
+  if (model == this.info.getModel() && this.info.isActive) return;
   // calculate the x/y of the sensor on the screen.
   var coord = goog.style.getPosition(sensor.getElement()).translate(
       this.sensorlayer.getOffset());

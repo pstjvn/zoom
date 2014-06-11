@@ -75,6 +75,11 @@ zoom.component.Info = function() {
    * @protected
    */
   this.tipSize = 0;
+  /**
+   * Flag for active state, used in main.
+   * @type {boolean}
+   */
+  this.isActive = false;
 };
 goog.inherits(zoom.component.Info, pstj.ui.Templated);
 
@@ -149,13 +154,14 @@ _.setAnimationMode = function(enable) {
 
 
 /**
- * Sets the active sttae of the component.
+ * Sets the active state of the component.
  * The implementation is in CSS.
  * @param {boolean} active If true the active class will be added.
  * @param {goog.math.Size=} opt_ss Current screen size.
  * @param {number=} opt_cs The size of the circle.
  */
 _.setActive = function(active, opt_ss, opt_cs) {
+  this.isActive = active;
   var x = 0;
   var y = 0;
   if (active) {
