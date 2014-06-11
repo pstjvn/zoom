@@ -69,6 +69,7 @@ _.enterDocument = function() {
     this.getElement().style.border = this.getModel().getBorderStyle();
     this.getElement().style.top = this.getModel().getPercentTop();
     this.getElement().style.left = this.getModel().getPercentLeft();
+    this.getElement().style.color = this.getModel().getFontColor();
     this.getElement().style['borderRadius'] = size;
     pstj.lab.style.css.setTranslation(this.getElement(),
         this.getModel().getSize() * -1,
