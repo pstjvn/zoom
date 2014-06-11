@@ -107,8 +107,15 @@ var o = zoom.component.Info.TipOrientation;
 /** @inheritDoc */
 _.setModel = function(model) {
   goog.asserts.assertInstanceof(model, pstj.ds.ListItem);
+  if (!goog.isNull(this.getElement())) {
+    goog.dom.classlist.enable(
+      this.getElement(),
+      goog.getCssName('small-text'),
+      model.getProp(zoom.model.SensorModel.DEFS.NAME).split('\r')[0].length > 20);
+  }
   goog.base(this, 'setModel', model);
   pstj.ui.ngAgent.getInstance().apply(this);
+
 };
 
 

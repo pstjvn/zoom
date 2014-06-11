@@ -61,6 +61,14 @@ _.getFormatedValue = function() {
 
 
 /**
+ * @return {string}
+ */
+_.getFontColor = function() {
+  return goog.asserts.assertString(this.getProp(defs.COLOR));
+};
+
+
+/**
  * Getter for the size of the item.
  * @return {number}
  */
