@@ -157,7 +157,8 @@ zoom.control.Main = function() {
 
   this.hideTooltipDelay_ = new goog.async.Delay(function() {
     this.info.setActive(false);
-  }, 2000, this);
+  }, goog.isNumber(goog.global['animationDuration']) ?
+      goog.global['animationDuration'] : 4000, this);
 
   this.initialize();
 };
