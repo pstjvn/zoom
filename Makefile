@@ -237,7 +237,6 @@ tpl:
 	--shouldProvideRequireSoyNamespaces \
 	--shouldGenerateJsdoc \
 	--codeStyle concat \
-	--cssHandlingScheme GOOG \
 	--outputPathFormat '$(TEMPLATE_TMP_DIR)/$(LOCALE)/{INPUT_FILE_NAME_NO_EXT}.soy.js' \
 	$(TEMPLATES_SOURCE_DIR)/*.soy
 

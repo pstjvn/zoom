@@ -198,7 +198,7 @@ _.initialize = function() {
   goog.dom.appendChild(document.body,
       goog.dom.htmlToDocumentFragment(zoom.template.main({
         items: list
-      })));
+      }).getContent()));
 
   this.frame.decorate(document.querySelector('.' +
       goog.getCssName('container')));

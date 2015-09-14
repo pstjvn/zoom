@@ -1,4 +1,5 @@
 goog.provide('zoom.component.Info');
+goog.provide('zoom.component.InfoTemplate');
 
 goog.require('goog.dom.classlist');
 goog.require('goog.style');
@@ -29,7 +30,7 @@ var _ = zoom.component.InfoTemplate.prototype;
 
 /** @inheritDoc */
 _.getTemplate = function() {
-  return zoom.template.info({});
+  return zoom.template.info({}).getContent();
 };
 
 });  // goog.scope
@@ -47,6 +48,12 @@ zoom.component.Info = function() {
    * @type {goog.math.Size}
    */
   this.size = null;
+  /**
+   * Cached size.
+   * @type {goog.math.Size}
+   * @private
+   */
+  this.cachedSize_ = null;
   this.graphButton = new pstj.ui.Button(
       (/** @type {goog.ui.ButtonRenderer} */(
       goog.ui.ControlRenderer.getCustomRenderer(
